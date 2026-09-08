@@ -412,6 +412,8 @@ export function TariffsManager() {
       </div>
       {rows === undefined ? (
         <LoadingRow />
+      ) : rows === null ? (
+        <EmptyRow message={t("admin.denied.desc")} />
       ) : rows.length === 0 ? (
         <EmptyRow message={t("admin.tab.empty")} />
       ) : (
