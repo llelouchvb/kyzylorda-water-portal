@@ -106,9 +106,9 @@ export default function Readings() {
                   { k: t("readings.success.value"), v: `${receipt.value} м³` },
                   { k: t("readings.success.date"), v: dateLong(receipt.date) },
                 ].map((row) => (
-                  <div key={row.k} className="flex items-center justify-between py-3">
+                  <div key={row.k} className="flex items-center justify-between gap-3 py-3">
                     <dt className="text-muted-foreground">{row.k}</dt>
-                    <dd className="font-extrabold tabular-nums">{row.v}</dd>
+                    <dd className="text-right font-extrabold tabular-nums">{row.v}</dd>
                   </div>
                 ))}
               </dl>
@@ -199,9 +199,9 @@ export default function Readings() {
               <div className="mt-5">
                 <Label>{t("readings.form.photo")}</Label>
                 <label className="mt-1.5 flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed px-4 py-3.5 transition-colors hover:border-primary/60 hover:bg-muted/40">
-                  <span className="flex items-center gap-2 text-sm font-semibold">
-                    <Camera className="size-4 text-primary" />
-                    {fileName ?? t("readings.form.attach")}
+                  <span className="flex min-w-0 items-center gap-2 text-sm font-semibold">
+                    <Camera className="size-4 shrink-0 text-primary" />
+                    <span className="min-w-0 truncate">{fileName ?? t("readings.form.attach")}</span>
                   </span>
                   <span className="text-[11px] text-muted-foreground">{t("readings.form.photoHint")}</span>
                   <input
