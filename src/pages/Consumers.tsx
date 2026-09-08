@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router";
 import { useI18n } from "@/lib/i18n";
-import { pick, SYSTEM_INFO } from "@/lib/content";
+import { SYSTEM_INFO } from "@/lib/content";
 import { Button } from "@/components/ui/button";
 import { PageHero, Reveal, SectionHeading } from "@/components/portal/primitives";
 import type { ComponentType } from "react";

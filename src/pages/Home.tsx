@@ -24,7 +24,7 @@ import { Link } from "react-router";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useI18n } from "@/lib/i18n";
-import { PHONES, telHref } from "@/lib/site";
+import { ORG, PHONES, telHref } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ import { DemoTag, Reveal, SectionHeading } from "@/components/portal/primitives"
 /* ---------------------------- hero quick check --------------------------- */
 
 function QuickCheck() {
-  const { t, money, dateTime, lang } = useI18n();
+  const { t, money, lang } = useI18n();
   const [account, setAccount] = useState("");
   const trimmed = account.trim();
   const isValid = /^\d{8}$/.test(trimmed);
@@ -343,7 +343,7 @@ export default function Home() {
               {[
                 { label: t("contacts.emergencyNote"), value: PHONES.emergencyPretty, icon: Siren },
                 { label: t("contacts.callCenter"), value: PHONES.callCenterPretty, icon: PhoneCall },
-                { label: t("contacts.hours"), value: t("contacts.hoursMonFri").split(":")[1]?.trim() ?? "", icon: Building2 },
+                { label: t("contacts.hours"), value: lang === "kk" ? ORG.workHoursKk : ORG.workHoursRu, icon: Building2 },
               ].map((row, i) => {
                 const Icon = row.icon;
                 return (
