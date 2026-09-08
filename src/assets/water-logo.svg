@@ -1,0 +1,12 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="120" fill="#0B4F9C"/>
+  <path d="M256 96C256 96 140 232.6 140 320C140 384.1 191.9 432 256 432C320.1 432 372 384.1 372 320C372 232.6 256 96 256 96Z" fill="url(#waterGrad)"/>
+  <path d="M256 384C214.7 384 184 354.2 184 314C184 290.6 197.4 262.6 218.6 237.4C236.3 216.5 250.6 201.4 256 192.6C261.4 201.4 275.7 216.5 293.4 237.4C314.6 262.6 328 290.6 328 314C328 354.2 297.3 384 256 384Z" fill="white" fill-opacity="0.94"/>
+  <path d="M230 356C228.9 356 228 355.1 228 354C228 352.9 228.9 352 230 352C253 352 280 335.7 280 304C280 302.9 280.9 302 282 302C283.1 302 284 302.9 284 304C284 339.6 253.6 356 230 356Z" fill="#0B4F9C" fill-opacity="0.35"/>
+  <defs>
+    <linearGradient id="waterGrad" x1="140" y1="110" x2="368" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5FB8F4"/>
+      <stop offset="1" stop-color="#2596E0"/>
+    </linearGradient>
+  </defs>
+</svg>
