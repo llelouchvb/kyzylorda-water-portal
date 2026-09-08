@@ -1,4 +1,37 @@
-.env.local
-node_modules
-dist
-src/convex/_generated
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+.vite/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables — never commit secrets
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Test coverage
+coverage/
+
+# Convex local state
+# Note: src/convex/_generated/ is intentionally NOT ignored —
+# Convex docs recommend committing it so the project typechecks after clone.
+.convex/
