@@ -1,98 +1,68 @@
-import { vlyPlugin } from "@vly-ai/integrations";
-import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+import vinext from "vinext";
 import { defineConfig } from "vite";
+import hostingConfig from "./.openai/hosting.json";
+import { readExecutionProfile } from "./scripts/execution-profile.mjs";
+import { sites } from "./build/sites-vite-plugin";
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), vlyPlugin(), tailwindcss()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-    // Force a single copy of React across all packages (including vlyPlugin).
-    // Without this, @vly-ai/integrations can resolve its own React copy, which
-    // triggers "Invalid hook call" errors at runtime.
-    dedupe: ["react", "react/jsx-runtime", "react-dom", "react-dom/client"],
-  },
-  build: {
-    // Enable source maps for better debugging (disable in production if needed)
-    sourcemap: false,
-    // Optimize chunk splitting
-    rollupOptions: {
-      output: {
-        // Manual chunk splitting for better caching and lazy loading
-        manualChunks: {
-          // Vendor chunks for large libraries
-          'react-vendor': ['react', 'react-dom', 'react-router'],
-          'convex-vendor': ['convex'],
-          // Large UI library chunks
-          'radix-ui': [
-            '@radix-ui/react-accordion',
-            '@radix-ui/react-alert-dialog',
-            '@radix-ui/react-avatar',
-            '@radix-ui/react-checkbox',
-            '@radix-ui/react-collapsible',
-            '@radix-ui/react-context-menu',
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-hover-card',
-            '@radix-ui/react-label',
-            '@radix-ui/react-menubar',
-            '@radix-ui/react-navigation-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-progress',
-            '@radix-ui/react-radio-group',
-            '@radix-ui/react-scroll-area',
-            '@radix-ui/react-select',
-            '@radix-ui/react-separator',
-            '@radix-ui/react-slider',
-            '@radix-ui/react-switch',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toggle',
-            '@radix-ui/react-toggle-group',
-            '@radix-ui/react-tooltip',
-          ],
-          // Heavy optional libraries - separate chunks for better lazy loading
-          'framer-motion': ['framer-motion'],
-          'charts': ['recharts'],
-          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+const SITE_CREATOR_PLACEHOLDER_DATABASE_ID =
+  "00000000-0000-4000-8000-000000000000";
+
+const { d1, r2 } = hostingConfig;
+
+// macOS Seatbelt blocks FSEvents, so Codex previews need polling for HMR.
+const isCodexSeatbeltSandbox = process.env.CODEX_SANDBOX === "seatbelt";
+const managedLinux = readExecutionProfile() === "managed-linux";
+
+const localBindingConfig = {
+  main: "vinext/server/fetch-handler",
+  compatibility_flags: ["nodejs_compat"],
+  d1_databases: d1
+    ? [
+        {
+          binding: d1,
+          database_name: "site-creator-d1",
+          database_id: SITE_CREATOR_PLACEHOLDER_DATABASE_ID,
         },
-        // Optimize chunk size
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash].[ext]',
-      },
+      ]
+    : [],
+  r2_buckets: r2
+    ? [
+        {
+          binding: r2,
+          bucket_name: "site-creator-r2",
+        },
+      ]
+    : [],
+};
+
+export default defineConfig(async () => {
+  // Use Miniflare's local Request.cf placeholder unless fetching is requested.
+  process.env.CLOUDFLARE_CF_FETCH_ENABLED ??= "false";
+  process.env.WRANGLER_SEND_METRICS ??= "false";
+
+  // Keep Wrangler and Miniflare state project-local. These are non-secret tool
+  // settings; application environment belongs in ignored `.env*` files.
+  process.env.WRANGLER_WRITE_LOGS ??= "false";
+  process.env.WRANGLER_LOG_PATH ??= ".wrangler/logs";
+  process.env.WRANGLER_REGISTRY_PATH ??= ".wrangler/dev-registry";
+  process.env.MINIFLARE_REGISTRY_PATH ??= ".wrangler/registry";
+
+  // Wrangler snapshots its log path while the Cloudflare plugin is imported.
+  const { cloudflare } = await import("@cloudflare/vite-plugin");
+
+  return {
+    server: {
+      ...(managedLinux ? { host: "0.0.0.0", allowedHosts: ["terminal.local"] } : {}),
+      ...(isCodexSeatbeltSandbox ? { watch: { useFsEvents: false, usePolling: true } } : {}),
     },
-    // Increase chunk size warning limit for better chunking
-    chunkSizeWarningLimit: 1000,
-    // Target modern browsers for better optimization
-    target: 'esnext',
-    // Minify options - using esbuild (faster than terser)
-    minify: 'esbuild',
-  },
-  // Optimize dependencies
-  optimizeDeps: {
-    // Only scan the app entry HTML; avoids crawling unrelated *.html files
-    // if a legacy snapshot accidentally contains leaked package folders.
-    entries: ['index.html'],
-    include: [
-      'react',
-      'react/jsx-runtime',
-      'react-dom',
-      'react-dom/client',
-      'react-router',
-      '@convex-dev/auth/react',
-      'framer-motion',
+    plugins: [
+      vinext(),
+      sites({ mockAuth: !managedLinux }),
+      cloudflare({
+        viteEnvironment: { name: "rsc", childEnvironments: ["ssr"] },
+        inspectorPort: false,
+        config: localBindingConfig,
+      }),
     ],
-  },
-  // Performance hints
-  server: {
-    // Bind to all interfaces so WebContainer's server-ready event fires.
-    host: true,
-    port: 5173,
-    // Keep HMR disabled (required by the managed preview runtime).
-    hmr: false,
-  },
+  };
 });
